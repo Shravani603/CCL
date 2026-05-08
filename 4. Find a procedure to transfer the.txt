@@ -1,0 +1,92 @@
+4. Find a procedure to transfer the files from one virtual machine to another virtual machine.
+
+Step 1: Download and Install Oracle VirtualBox
+
+Step 2: Download Ubuntu VMDK Image
+
+Step 3: Launch VirtualBox and Create New VM
+Open VirtualBox
+Click on New
+Enter:
+Name of VM : VM1
+OS → Linux
+OS Version → Ubuntu (64-bit)
+specify virtual hardware → Base Memory → 1024 MB
+Use an existing virtual hard disk file → Browse .vmdk file
+Finish
+
+#SIMILARLY
+Name of VM : VM2
+OS → Linux
+OS Version → Ubuntu (64-bit)
+specify virtual hardware → Base Memory → 1024 MB
+specify virtual hard disk→Use an existing virtual hard disk file → Browse .vmdk file
+Finish
+
+Open VirtualBox:
+File → Tools → Network
+Open the NAT Networks tab → Create+(top taskbar left side)
+Apply
+
+click VM1 →Settings → Network → Attached To → NAT Network
+
+click VM2 →Settings → Network → Attached To → NAT Network
+
+
+Launch Both Virtual Machines (START)
+
+#SAME STEPS FOR BOTH VM'S
+
+vagrant login → type "vagrant" → password type: "vagrant"
+
+you will see something like: vagrant@ubuntu:~$
+#type commands
+sudo apt update
+sudo apt install net-tools
+
+#after this command runs in  'eth0' you will see 'i net'  keep in mind the IP address (10.0.2.4)
+
+
+
+#IN VM1
+
+#Create File
+touch transfer.txt
+
+#Open File
+nano transfer.txt
+
+# Write: Hello from VM1
+
+#Press:  Ctrl + O
+
+#Then: Ctrl + X
+
+#Run this command in VM1:
+scp transfer.txt vagrant@10.0.2.3:/home/vagrant  
+(10.0.2.3 taken from i net IP address)
+
+Are you sure you want to continue connecting (yes/no)?
+Type: yes
+
+password: vagrant
+
+
+#Check File in VM2
+
+In VM2 run: 
+ls
+
+#To view content:
+cat transfer.txt
+
+
+
+
+
+
+
+
+
+
+

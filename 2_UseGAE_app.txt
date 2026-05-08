@@ -1,0 +1,74 @@
+Use GAE launcher to launch the web applications.
+
+#Create Project Folder(terminal)
+mkdir myapp
+cd myapp
+
+#hello.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello World from Google App Engine!"
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=8080, debug=True)
+
+
+#app.yaml
+runtime: python39
+entrypoint: gunicorn -b :$PORT main:app
+
+
+#requirements.txt
+Flask==3.0.0
+gunicorn==21.2.0
+
+
+#GAE shell
+cd "paste_path_here"
+
+#run
+set FLASK_APP=hello.py
+
+set FLASK_ENV=development
+
+python.exe -m pip install --upgrade pip
+
+pip install -r requirements.txt
+(ONLY IF Error RUN)  python.exe -m pip install -r requirements.txt
+
+
+python -m flask run
+
+
+
+
+
+
+
+
+# IF ERROR
+#main.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Hello World from Google App Engine"
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080)
+
+#app.yaml
+runtime: python39
+entrypoint: python main.py
+
+#requirements.txt
+Flask==3.0.0
+
+#GAE shell
+dev_appserver.py app.yaml

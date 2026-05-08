@@ -1,0 +1,86 @@
+1.Install Google App Engine. Create hello world app and other simple web applications using python/java. 
+
+#STEPS
+#1.open google chrome
+#2.search,open Google Cloud SDK installer.exe
+#3.Download the Google Cloud CLI installer OR
+#https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
+#4.install python installer
+
+
+#5.in cmd - pip install Flask
+
+#open VS code - terminal 
+# CODE Type - mkdir my-flask-app
+cd my-flask-app
+#open 'my-flask-app' folder in vs code
+
+#requirements.txt
+Flask==3.0.0
+gunicorn==21.2.0
+
+#hello.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello World from Google App Engine!"
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=8080, debug=True)
+
+
+#app.yaml
+runtime: python39
+entrypoint: gunicorn -b :$PORT main:app
+
+instance_class: F1
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 1
+
+#to run - terminal
+python hello.py
+
+
+
+
+
+
+##Initialize Google Cloud SDK
+gcloud init
+
+##Create Google Cloud Project
+gcloud projects create shravani-flask-260506
+gcloud config set project shravani-flask-260506
+
+##Create App Engine
+gcloud app create
+#Choose region:
+asia-south1
+
+gcloud app deploy
+Y
+
+gcloud app browse
+
+
+#addition.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def add():
+    a = 10
+    b = 20
+    return f"Addition = {a+b}"
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+#run
+python addition.py

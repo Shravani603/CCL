@@ -1,0 +1,219 @@
+Download the cloudsim jar
+file-https://github.com/Cloudslab/cloudsim/releases/tag/cloudsim-4.0
+
+Download and install java sdk
+from-https://www.oracle.com/java/technologies/downloads/#java11
+
+Download and install eclipse
+from-https://www.eclipse.org/downloads/packages/release/kepler/sr1/
+eclipse-ide-java-developers
+
+open eclipse
+
+file -> new -> java project
+
+give name: prac3
+
+location ->browse -> cloudsim
+
+
+right click prac3 -> new -> package "prac3"
+
+right click package prac3 -> new -> class "FCFS.java"
+
+#code
+package prac3;
+
+import org.cloudbus.cloudsim.*;
+import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.provisioners.*;
+
+import java.util.*;
+
+public class FCFS {
+
+    public static void main(String[] args) {
+
+        int numUsers = 1;
+        Calendar calendar = Calendar.getInstance();
+        boolean traceFlag = false;
+
+        CloudSim.init(numUsers, calendar, traceFlag);
+
+        Datacenter datacenter0 = createDatacenter("Datacenter_0");
+        DatacenterBroker broker = createBroker();
+        int brokerId = broker.getId();
+
+        // ================= VMs =================
+        List<Vm> vmList = new ArrayList<>();
+
+        int vmCount = 4;
+        int mips = 1000;
+
+        for (int i = 0; i < vmCount; i++) {
+            Vm vm = new Vm(
+                    i,
+                    brokerId,
+                    mips,
+                    1,
+                    1024,
+                    10000,
+                    10000,
+                    "Xen",
+                    new CloudletSchedulerSpaceShared()   // ✔ FCFS behavior
+            );
+            vmList.add(vm);
+        }
+
+        broker.submitVmList(vmList);
+
+        // ================= CLOUDLETS =================
+        List<Cloudlet> cloudletList = new ArrayList<>();
+
+        int cloudletCount = 8;
+        long length = 40000;
+        int pesNumber = 1;
+        long fileSize = 300;
+        long outputSize = 300;
+
+        UtilizationModel utilizationModel = new UtilizationModelFull();
+
+        for (int i = 0; i < cloudletCount; i++) {
+            Cloudlet cloudlet = new Cloudlet(
+                    i,
+                    length,
+                    pesNumber,
+                    fileSize,
+                    outputSize,
+                    utilizationModel,
+                    utilizationModel,
+                    utilizationModel
+            );
+
+            cloudlet.setUserId(brokerId);
+            cloudletList.add(cloudlet);
+        }
+
+        // ✔ Ensure FCFS order
+        cloudletList.sort(Comparator.comparingInt(Cloudlet::getCloudletId));
+
+        broker.submitCloudletList(cloudletList);
+
+        // ================= FCFS ASSIGNMENT =================
+        assignFCFS(cloudletList, vmList);
+
+        // ================= RUN SIMULATION =================
+        CloudSim.startSimulation();
+
+        List<Cloudlet> resultList = broker.getCloudletReceivedList();
+
+        CloudSim.stopSimulation();
+
+        printResults(resultList);
+    }
+
+    // ================= FCFS VM ASSIGNMENT =================
+    private static void assignFCFS(List<Cloudlet> cloudletList, List<Vm> vmList) {
+
+        int vmIndex = 0;
+
+        for (Cloudlet cloudlet : cloudletList) {
+            cloudlet.setVmId(vmList.get(vmIndex).getId());
+
+            vmIndex++;
+            if (vmIndex == vmList.size()) {
+                vmIndex = 0;
+            }
+        }
+    }
+
+    // ================= DATACENTER =================
+    private static Datacenter createDatacenter(String name) {
+
+        List<Host> hostList = new ArrayList<>();
+
+        int mips = 10000;
+        int ram = 16384;
+        long storage = 1000000;
+        int bw = 10000;
+
+        // ✔ FIXED PE PROVISIONING (your error was here)
+        List<Pe> peList = new ArrayList<>();
+
+        PeProvisionerSimple peProvisioner = new PeProvisionerSimple(mips);
+        peList.add(new Pe(0, peProvisioner));
+
+        hostList.add(
+                new Host(
+                        0,
+                        new RamProvisionerSimple(ram),
+                        new BwProvisionerSimple(bw),
+                        storage,
+                        peList,
+                        new VmSchedulerSpaceShared(peList) // ✔ safe for most CloudSim 3.x
+                )
+        );
+
+        String arch = "x86";
+        String os = "Linux";
+        String vmm = "Xen";
+
+        DatacenterCharacteristics characteristics =
+                new DatacenterCharacteristics(
+                        arch,
+                        os,
+                        vmm,
+                        hostList,
+                        10,
+                        3,
+                        0.05,
+                        0.1,
+                        0.1
+                );
+
+        try {
+            return new Datacenter(
+                    name,
+                    characteristics,
+                    new VmAllocationPolicySimple(hostList),
+                    new LinkedList<>(),
+                    0
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // ================= BROKER =================
+    private static DatacenterBroker createBroker() {
+        try {
+            return new DatacenterBroker("Broker");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // ================= OUTPUT =================
+    private static void printResults(List<Cloudlet> list) {
+
+        System.out.println("\n========== FCFS OUTPUT ==========");
+        System.out.println("ID | STATUS | VM | EXEC TIME | START | FINISH");
+
+        for (Cloudlet c : list) {
+            System.out.printf(
+                    "%2d | %7s | %2d | %9.2f | %5.2f | %6.2f%n",
+                    c.getCloudletId(),
+                    (c.getStatus() == Cloudlet.SUCCESS ? "DONE" : "FAIL"),
+                    c.getVmId(),
+                    c.getActualCPUTime(),
+                    c.getExecStartTime(),
+                    c.getFinishTime()
+            );
+        }
+    }
+}
+
+
+Last step : click Run
