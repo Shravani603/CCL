@@ -47,27 +47,6 @@ python hello.py
 
 
 
-
-
-
-##Initialize Google Cloud SDK
-gcloud init
-
-##Create Google Cloud Project
-gcloud projects create shravani-flask-260506
-gcloud config set project shravani-flask-260506
-
-##Create App Engine
-gcloud app create
-#Choose region:
-asia-south1
-
-gcloud app deploy
-Y
-
-gcloud app browse
-
-
 #addition.py
 from flask import Flask
 
@@ -84,3 +63,22 @@ if __name__ == "__main__":
 
 #run
 python addition.py
+
+
+#GAE shell
+##Initialize Google Cloud SDK
+gcloud init
+cd "paste_path_here"
+
+#run
+set FLASK_APP=hello.py
+
+set FLASK_ENV=development
+
+python.exe -m pip install --upgrade pip
+
+pip install -r requirements.txt
+(ONLY IF Error RUN)  python.exe -m pip install -r requirements.txt
+
+
+python -m flask run
